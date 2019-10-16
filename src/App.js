@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import './App.css';
 import {AppContainer} from './components/AppContainer/Appcontainer';
 import ListOfBooks from './components/Books/ListOfBooks';
-import {EditABook} from './components/Books/EditBooks';
+import {EditDialog} from './components/Books/EditBookDialogue';
 
 
 class App extends Component{
@@ -13,8 +13,12 @@ class App extends Component{
     <Router>
          <Switch>
            <AppContainer>
+             <Route exact path='/' component={ListOfBooks} />
              <Route exact path='/listOfBooks' component={ListOfBooks} />
-             <Route path='/editBook' component={EditABook} />
+             <Route exact path='/googleBookList' component={ListOfBooks} />
+             <Route path='/editBook' component={EditDialog} />
+             <Route path='/addABook' component={EditDialog} />
+
           </AppContainer>
          </Switch>
     </Router>
