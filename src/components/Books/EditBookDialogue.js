@@ -13,10 +13,6 @@ export  const EditDialog=(props)=>{
   const [open, setOpen] = React.useState(true);
   const [openNotification,setNotification]=React.useState(false);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
   const handleNotificationClose = (event, reason) => {
     if (reason === 'clickaway') {
       return;
@@ -26,6 +22,7 @@ export  const EditDialog=(props)=>{
 
   const handleClose = () => {
     setOpen(false);
+    props.history.push({pathname: '/'})
   };
 
   const [values, setValues] = React.useState(
@@ -37,18 +34,24 @@ const handleChange = name => event => {
 };
 
 let saveChanges=()=>{
- console.log("values are : ",values)
- axios.post(`http://localhost:8080/editThisBook`,{
-   ...values
- })
- .then(res => {
-   console.log("Edit" ,res && res.data);
-   setNotification(true);
-   handleClose();
-   setTimeout(() => {
-    props.history.push({pathname: '/'})
-  }, 2000);
- })
+      console.log("values are : ",values)
+      setNotification(true);
+
+     axios.post(`http://localhost:8080/addBook`, {
+        ...values
+      })
+        .then(res => {
+          axios.post(`http://localhost:8080/editThisBook`,{
+            ...values
+          })
+          .then(res => {
+            console.log("Edit" ,res && res.data);
+            setTimeout(() => {
+              handleClose();
+             props.history.push({pathname: '/'})
+           }, 1000);
+          })
+        })
 }
 const useStyles = makeStyles(theme => ({
     container: {

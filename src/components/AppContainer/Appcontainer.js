@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState,useEffect } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import IconButton from '@material-ui/core/IconButton';
@@ -67,6 +67,7 @@ const useStyles = makeStyles(theme => ({
 
 export const AppContainer=(props)=>{
     const classes = useStyles();
+    const[query,setQuery]=useState();
 
     return (
         <React.Fragment>
@@ -93,10 +94,14 @@ export const AppContainer=(props)=>{
 
           <div className={classes.search}>
             <div className={classes.searchIcon}>
-              <SearchIcon />
+              {/* <SearchIcon  onClick={this.props.history.push({
+                        pathname: '/search',
+                        query: { query }
+                      })}/> */}
             </div>
             <InputBase
               placeholder="Search…"
+              onChange={e=>setQuery(e.target.value)}
               classes={{
                 root: classes.inputRoot,
                 input: classes.inputInput,
@@ -106,6 +111,7 @@ export const AppContainer=(props)=>{
           </div>
         </Toolbar>
       </AppBar>
+      {console.log(props)}
     </div>
       {props.children}
       </React.Fragment>

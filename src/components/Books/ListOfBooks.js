@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import axios from 'axios';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -10,6 +10,14 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { SimpleSnackbar } from './../Notification/SnackBar';
+import IconButton from "@material-ui/core/IconButton";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import SearchIcon from "@material-ui/icons/Search";
+import TextField from "@material-ui/core/TextField";
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 
 class ListOfBooks extends Component {
@@ -21,8 +29,9 @@ class ListOfBooks extends Component {
       books: [],
       inventoryBooks: [],
       searchAvailable: true,
-      open:false,
-      message:'',
+      open: false,
+      message: '',
+      params: '',
       isGooglePage: RegExp('google*').test(window.location.href)
     }
 
@@ -38,7 +47,7 @@ class ListOfBooks extends Component {
   };
 
   componentDidMount() {
-    console.log("Component did mount" +this.state.isGooglePage);
+    console.log("Component did mount" + this.state.isGooglePage);
     this.state.isGooglePage ? this.fetchGoogleBooks() : this.fetchInventoryBooks()
   }
   fetchInventoryBooks = () => {
@@ -50,10 +59,10 @@ class ListOfBooks extends Component {
       })
   }
 
-  fetchGoogleBooks = () => {
-
+  fetchGoogleBooks = (param) => {
+    console.log("Searching google book with ", this.state.params)
     var googleBooks = [];
-    axios.get(`http://localhost:8080/fetchGoogleBooks/abc`)
+    axios.get(`http://localhost:8080/fetchGoogleBooks/${param}`)
       .then(res => {
         res.data[0].items.forEach((item) => {
           googleBooks.push(item.volumeInfo);
@@ -66,9 +75,11 @@ class ListOfBooks extends Component {
 
   }
 
-  searchABook = (params) => {
-    console.log("Search Params " + params)
-    axios.get(`http://localhost:8080/findThisBook/${params}`)
+  searchABook = () => {
+    console.log("Search Params " + this.state.params)
+    axios.get(`http://localhost:8080/findThisBook/`, {
+      params: { searchParameter: this.state.params }
+    })
       .then(res => {
         this.setState({
           books: res.data
@@ -78,40 +89,25 @@ class ListOfBooks extends Component {
 
   addBookToInventory = (card) => {
     console.log("Add pressed", card.title.toUpperCase())
-    var newGoogleBooks = [];
-    if (false) {
-
-    } else {
-      axios.post(`http://localhost:8080/addBook`, {
-        ...card
-      })
-        .then(res => {
-          newGoogleBooks = this.state.books.filter(book =>
-            book.id !== card.id
-          )
-          this.setState({
-            books: newGoogleBooks,
-            open: true,
-            message: `Book '${card.title}' added succesfully`
-          })
-        })
-    }
-
+    this.props.history.push({
+      pathname: '/editBook',
+      book: { card }
+    })
   }
 
   deleteABook = (card) => {
     console.log("Delete pressed", card)
-    axios.get(`http://localhost:8080/deleteThisBook`, {
-      params: { bookId: card.id }
-    })
+    axios.post(`http://localhost:8080/deleteThisBook`, {
+      ...card
+        })
       .then(res => {
         const newBooks = this.state.books.filter(book =>
           book.id !== card.id
         )
         this.setState({
           books: newBooks,
-          open:true,
-          message: `Book '${card.title}' deleted succesfully`
+          open: true,
+          message: `Book deleted succesfully`
 
         })
       })
@@ -133,16 +129,27 @@ class ListOfBooks extends Component {
     })
     return result
   }
+  updateSearchParam = (param) => {
+    console.log("updating Search Param", param);
+    this.setState({
+      params: param
+    })
+    this.fetchGoogleBooks(param);
+  }
 
   render() {
     return (
       <div>
         {this.state.open && <SimpleSnackbar handleClose={this.handleClose} message={this.state.message}> </SimpleSnackbar>}
+        {this.state.isGooglePage}
         <ViewBooks cards={this.state.books}
           history={this.props.history}
           isGooglePage={this.state.isGooglePage}
           deleteBook={this.deleteABook}
+          searchABook={this.searchABook}
           addBook={this.addBookToInventory}
+          params={this.state.searchParam}
+          updateSearchParam={this.updateSearchParam}
         ></ViewBooks>
       </div>
     )
@@ -180,10 +187,29 @@ export const ViewBooks = (props) => {
     footer: {
       backgroundColor: theme.palette.background.paper,
       padding: theme.spacing(6),
+    }, inputRoot: {
+      color: 'inherit',
+    },
+    inputInput: {
+      padding: theme.spacing(1, 1, 1, 7),
+      transition: theme.transitions.create('width'),
+      width: '100%',
+      [theme.breakpoints.up('sm')]: {
+        width: 120,
+        '&:focus': {
+          width: 200,
+        },
+      },
     },
   }));
 
   const classes = useStyles();
+
+  const [expanded, setExpanded] = React.useState(false);
+
+  const handleChange = panel => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
 
   let editABook = (card) => {
     console.log("Edit pressed", card)
@@ -192,12 +218,27 @@ export const ViewBooks = (props) => {
       book: { card }
     })
   }
+  const [searchField, setSearchField] = useState();
 
   return (
     <React.Fragment>
       <main>
         <Container className={classes.cardGrid} maxWidth="md">
           {console.log("props", props.cards)}
+          {props.isGooglePage && <Grid container spacing={1}><TextField
+            label="Enter Your QUERY here"
+            onChange={e => setSearchField(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment>
+                  <IconButton>
+                    <SearchIcon onClick={e => props.updateSearchParam(searchField)} />
+                  </IconButton>
+                </InputAdornment>
+              )
+            }
+            }
+          /></Grid>}
           <Grid container spacing={4}>
             {props.cards && props.cards.map(card => (
               <Grid item key={card} xs={12} sm={6} md={4}>
@@ -208,23 +249,34 @@ export const ViewBooks = (props) => {
                     title={card.title}
                   />
                   <CardContent className={classes.cardContent}>
-                    <Typography gutterBottom variant="h5" component="h2">
-                      {card.title}
-                    </Typography>
+                    <span >
+                      <h5>{card.title}</h5>
+                    </span>
                     <Typography gutterBottom >
-                      Authors : {card.authors && card.authors.map((author) => {
-                        return <p>{author}</p>
-                      })}
+                      {`By ${card.authors && card.authors.toString()}`}
                     </Typography>
-                    <Typography>
-                      {card.description}
+                    <ExpansionPanel expanded={expanded === card.id} onChange={handleChange(card.id)}>
+                        <ExpansionPanelSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls="panel1bh-content"
+                          id="panel1bh-header"
+                        >
+          <b>Descrpition : </b>
+          <span >{card.description && card.description.substring(0,50)}</span>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
+        <Typography>
+                        {card.description}
                     </Typography>
-                    <Typography>
+        </ExpansionPanelDetails>
+        </ExpansionPanel>
+
+                    {!props.isGooglePage && <div><Typography>
                       Price : {card.price}
                     </Typography>
-                    <Typography>
-                      Quantity : {card.quantity}
-                    </Typography>
+                      <Typography>
+                        Quantity : {card.quantity}
+                      </Typography> </div>}
                   </CardContent>
                   <CardActions>
                     {!props.isGooglePage ? (<div><Button size="small" color="primary" onClick={() => editABook(card)}>
