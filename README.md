@@ -66,3 +66,8 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `yarn build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+
+
+# docker build -t inventory-ui .
+# docker images | grep inventory-ui
+# docker run -it -p 3200:3000 inventory-ui  to run it on port 3200ß
