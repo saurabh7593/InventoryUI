@@ -34,6 +34,7 @@ class ListOfBooks extends Component {
       params: '',
       isGooglePage: RegExp('google*').test(window.location.href)
     }
+    console.log("ListOfBooks",props);
 
   }
 
@@ -50,7 +51,7 @@ class ListOfBooks extends Component {
     console.log("Component did mount" + this.state.isGooglePage);
     this.state.isGooglePage ? this.fetchGoogleBooks() : this.fetchInventoryBooks()
   }
-  fetchInventoryBooks = () => {
+  fetchInventoryBooks(){
     axios.get(`http://localhost:8080/listAllBooks`)
       .then(res => {
         this.setState({
@@ -97,9 +98,7 @@ class ListOfBooks extends Component {
 
   deleteABook = (card) => {
     console.log("Delete pressed", card)
-    axios.post(`http://localhost:8080/deleteThisBook`, {
-      ...card
-        })
+    axios.post(`http://localhost:8080/deleteThisBook/${card.id}`)
       .then(res => {
         const newBooks = this.state.books.filter(book =>
           book.id !== card.id
@@ -224,7 +223,6 @@ export const ViewBooks = (props) => {
     <React.Fragment>
       <main>
         <Container className={classes.cardGrid} maxWidth="md">
-          {console.log("props", props.cards)}
           {props.isGooglePage && <Grid container spacing={1}><TextField
             label="Enter Your QUERY here"
             onChange={e => setSearchField(e.target.value)}

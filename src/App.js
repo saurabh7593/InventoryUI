@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import AppContainer from './components/AppContainer/Appcontainer'
 import './App.css';
-import {AppContainer} from './components/AppContainer/Appcontainer';
 import ListOfBooks from './components/Books/ListOfBooks';
 import {EditDialog} from './components/Books/EditBookDialogue';
 import {AuditReport} from './components/Audit/AuditReport';
-import {SearchABook} from './components/Books/SearchBar'
+import {SearchABook} from './components/Books/SearchBook'
+
 
 class App extends Component{
   constructor(props){
@@ -24,12 +25,11 @@ class App extends Component{
              <Route path='/editBook' component={EditDialog} />
              <Route path='/addABook' component={EditDialog} />
              <Route path='/auditReport' component={AuditReport} />
+             <Route path='/search' component={SearchABook} />
           </AppContainer>
          </Switch>
     </Router>
- 
-  );
-  }
+  )}
 }
 
 export default App;

@@ -48,8 +48,8 @@ let saveChanges=()=>{
             console.log("Edit" ,res && res.data);
             setTimeout(() => {
               handleClose();
-             props.history.push({pathname: '/'})
-           }, 1000);
+             props.history.push({pathname: '/listOfBooks'})
+           }, 500);
           })
         })
 }
