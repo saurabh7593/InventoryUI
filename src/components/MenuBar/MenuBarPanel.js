@@ -89,7 +89,7 @@ const MenuBarPanel=(props)=>{
             <MenuIcon />
           </IconButton>
           <Typography className={classes.title} variant="h6" noWrap>
-            Books Inventory
+          <Link to="/listOfBooks">Books Inventory</Link>
           </Typography>
           <Link to="/listOfBooks"><Button >Home</Button></Link>
           <Link to="/googleBookList"><Button >View Google Books</Button></Link>

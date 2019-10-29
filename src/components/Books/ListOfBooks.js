@@ -63,7 +63,7 @@ class ListOfBooks extends Component {
   fetchGoogleBooks = (param) => {
     console.log("Searching google book with ", this.state.params)
     var googleBooks = [];
-    axios.get(`http://localhost:8080/fetchGoogleBooks/${param}`)
+    param!==undefined && axios.get(`http://localhost:8080/fetchGoogleBooks/${param}`)
       .then(res => {
         res.data[0].items.forEach((item) => {
           googleBooks.push(item.volumeInfo);
